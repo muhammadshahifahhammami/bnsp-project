@@ -1,0 +1,42 @@
+name: Deploy to AWS VPC
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Deploy to EC2 in VPC
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          echo "🚀 Starting deployment..."
+          cd /home/ubuntu/bnsp-project
+          
+          # Pull latest code
+          git pull origin main
+          
+          # Build Docker image
+          docker build -t bnsp-app:latest .
+          
+          # Stop and remove old container
+          docker stop bnsp-app || true
+          docker rm bnsp-app || true
+          
+          # Run new container
+          docker run -d \
+            --name bnsp-app \
+            --network host \
+            -p 80:5000 \
+            bnsp-app:latest
+          
+          echo "✅ Deployment completed!"
