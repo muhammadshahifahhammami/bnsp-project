@@ -1,0 +1,3 @@
+git branch: 'main',
+    credentialsId: 'github-cred',
+    url: 'https://github.com/muhammadshahifahhammami/bnsp-project.git'
